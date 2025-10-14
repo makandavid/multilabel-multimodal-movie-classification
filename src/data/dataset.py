@@ -1,4 +1,5 @@
 import pandas as pd
+import ast
 from sklearn.preprocessing import MultiLabelBinarizer
 from torch.utils.data import Dataset
 from torchvision.transforms import Compose
@@ -8,6 +9,7 @@ def load_movies(path="data/processed/movies_subset.csv"):
     return pd.read_csv(path)
 
 def prepare_labels(df: pd.DataFrame):
+    df['genres'] = df['genres'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) else [])
     mlb = MultiLabelBinarizer()
     y = mlb.fit_transform(df['genres'])
     return y, mlb
