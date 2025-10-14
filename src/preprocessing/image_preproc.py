@@ -1,6 +1,8 @@
 from torchvision import transforms, models
 import torch.nn as nn
 import torch
+import numpy as np
+import cv2
 
 def get_transforms(train=True):
     if train:
@@ -27,3 +29,9 @@ def extract_resnet_features(images: torch.Tensor, model: nn.Module | None = None
     with torch.no_grad():
         feats = torch.squeeze(model(images))
     return feats
+
+def extract_color_historgram(image, bins=(8, 8, 8)):
+    image = np.array(image)
+    hist = cv2.calcHist([image], [0, 1, 2], None, bins, [0, 256, 0, 256, 0, 256])
+    hist = cv2.normalize(hist, hist).flatten()
+    return hist
