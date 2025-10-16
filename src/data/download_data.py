@@ -71,6 +71,6 @@ def prepare_dataset(df: pd.DataFrame, num_samples=5000):
 
 if __name__ == "__main__":
     df = pd.read_csv("data/raw/movies_metadata.csv", low_memory=False)
-    # prepare_dataset(df, num_samples=5000)
-    df_text = df[df['overview'].notna()]  # filter movies with overview
-    df_text.to_csv("data/processed/movies_text.csv", index=False)
+    prepare_dataset(df, num_samples=10000)
+    # df_text = df[df['overview'].notna()]  # filter movies with overview
+    # df_text.to_csv("data/processed/movies_text.csv", index=False)

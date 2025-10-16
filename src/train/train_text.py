@@ -9,7 +9,7 @@ from src.preprocessing.text_preproc import clean_text, build_tfidf
 from src.data.dataset import prepare_labels
 from src.models.text_models import train_text_nb
 
-def train_text_model(csv_path = "data/processed/movies_text.csv"):
+def train_text_model(csv_path = "data/processed/movies_subset.csv"):
 
     # Load data
     df = pd.read_csv(csv_path)
