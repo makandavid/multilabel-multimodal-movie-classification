@@ -1,8 +1,8 @@
-from torchvision import transforms, models
-import torch.nn as nn
-import torch
+from torchvision import transforms
 import numpy as np
 import cv2
+from tqdm import tqdm
+from src.data.dataset import PosterDataset
 
 def get_transforms(train=True):
     if train:
@@ -20,18 +20,22 @@ def get_transforms(train=True):
         transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                 std=[0.229, 0.224, 0.225])
     ])
-    
-def extract_resnet_features(images: torch.Tensor, model: nn.Module | None = None):
-    if model is None:
-        base = models.resnet50(pretrained=True)
-        model = nn.Sequential(*list(base.children())[:-1])
-        model.eval()
-    with torch.no_grad():
-        feats = torch.squeeze(model(images))
-    return feats
 
-def extract_color_historgram(image, bins=(8, 8, 8)):
+def extract_color_histogram(image, bins=(8, 8, 8)):
     image = np.array(image)
     hist = cv2.calcHist([image], [0, 1, 2], None, bins, [0, 256, 0, 256, 0, 256])
     hist = cv2.normalize(hist, hist).flatten()
     return hist
+
+def extract_features_from_dataset(dataset: PosterDataset):
+    all_features, all_labels = [], []
+
+    for i in tqdm(range(len(dataset)), desc="Extracting color histograms"):
+        image, label = dataset[i]
+        hist = extract_color_histogram(image)
+        all_features.append(hist)
+        all_labels.append(label.numpy())
+
+    X = np.array(all_features)
+    Y = np.array(all_labels)
+    return X, Y

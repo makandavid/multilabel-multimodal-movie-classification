@@ -1,8 +1,10 @@
+import os
 import nltk
 import re
 import string
 from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 nltk.download('stopwords', quiet=True)
@@ -28,5 +30,5 @@ def clean_text(text: str):
 
 def build_tfidf(corpus, max_features=20000):
     vectorizer = TfidfVectorizer(max_features=max_features, ngram_range=(1, 2))
-    x = vectorizer.fit_transform(corpus)
-    return x, vectorizer
+    X = vectorizer.fit_transform(corpus)
+    return X, vectorizer

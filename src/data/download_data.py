@@ -28,9 +28,18 @@ def download_posters(df: pd.DataFrame, posters_dir="data/posters", base_url="htt
         except Exception as e:
             print("failed", movie_id, e)
 
-def get_poster(movie_id, poster_path, posters_dir="data/posters", base_url="https://image.tmdb.org/t/p/w500"):
+def get_poster(
+    movie_id: int,
+    poster_path: str,
+    posters_dir: str = "data/posters",
+    base_url: str = "https://image.tmdb.org/t/p/w500"
+) -> Image.Image:
+    
     os.makedirs(posters_dir, exist_ok=True)
     out_path = f"{posters_dir}/{movie_id}.jpg"
+
+    if not poster_path or not isinstance(poster_path, str) or poster_path == "nan":
+        return Image.new("RGB", (500, 750), color=(0, 0, 0))  # black placeholder
 
     if not os.path.exists(out_path):
         url = f"{base_url}{poster_path}"
@@ -39,12 +48,26 @@ def get_poster(movie_id, poster_path, posters_dir="data/posters", base_url="http
             if r.status_code == 200:
                 with open(out_path, "wb") as f:
                     f.write(r.content)
+            else:
+                print(f"Poster not found (HTTP {r.status_code}) for movie {movie_id}")
+                return Image.new("RGB", (500, 750), color=(0, 0, 0))
         except Exception as e:
-            print("failed", movie_id, e)
+            print(f"Failed to download poster for movie {movie_id}: {e}")
+            return Image.new("RGB", (500, 750), color=(0, 0, 0))
 
-    return Image.open(out_path).convert("RGB")        
+    try:
+        return Image.open(out_path).convert("RGB")
+    except Exception as e:
+        print(f"Corrupt or missing poster for movie {movie_id}: {e}")
+        return Image.new("RGB", (500, 750), color=(0, 0, 0))       
 
 def prepare_dataset(df: pd.DataFrame, num_samples=5000):
     df = df[df['poster_path'].notna()].sample(n=num_samples, random_state=42)
-    # download_posters(df)
+    download_posters(df)
+    os.makedirs("data/processed", exist_ok=True)
     df.to_csv("data/processed/movies_subset.csv", index=False)
+
+
+if __name__ == "__main__":
+    df = pd.read_csv("data/raw/movies_metadata.csv", low_memory=False)
+    prepare_dataset(df, num_samples=500)
