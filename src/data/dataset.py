@@ -9,11 +9,16 @@ from src.data.download_data import get_poster
 def load_movies(path="data/processed/movies_subset.csv"):
     return pd.read_csv(path)
 
-def prepare_labels(df: pd.DataFrame):
+def prepare_labels(df: pd.DataFrame, fit_mlb=True, mlb=None):
     df["genres"] = df["genres"].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) else x)
     df['genres'] = df['genres'].apply(lambda lst: [g["name"] for g in lst if isinstance(g, dict)])
-    mlb = MultiLabelBinarizer()
-    return mlb.fit_transform(df['genres'])
+    if fit_mlb:
+        mlb = MultiLabelBinarizer()
+        y = mlb.fit_transform(df["genres"])
+        return y, mlb
+    else:
+        y = mlb.transform(df["genres"])
+        return y
 
 class PosterDataset(Dataset):
     def __init__(self, df: pd.DataFrame, y: np.ndarray, transforms=None):

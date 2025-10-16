@@ -3,31 +3,28 @@ import pickle
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report
+from sklearn.metrics import f1_score, hamming_loss, accuracy_score
+from scipy.sparse import save_npz
 from src.preprocessing.text_preproc import clean_text, build_tfidf
 from src.data.dataset import prepare_labels
 from src.models.text_models import train_text_nb
 
-def train_text_model(
-    csv_path = "data/processed/movies_subset.csv"
-):
+def train_text_model(csv_path = "data/processed/movies_text.csv"):
+
     # Load data
     df = pd.read_csv(csv_path)
+    df["overview"] = df["overview"].apply(clean_text)
 
     # Split into train/val/test (70/15/15)
     train_df, temp_df = train_test_split(df, test_size=0.30, random_state=42)
     val_df, test_df = train_test_split(temp_df, test_size=0.50, random_state=42)
 
     # Prepare labels
-    y = prepare_labels(df)
-    y_train, y_val, y_test = (
-        y[train_df.index],
-        y[val_df.index],
-        y[test_df.index],
-    )
+    y_train, mlb = prepare_labels(train_df, fit_mlb=True)
+    y_val = prepare_labels(val_df, fit_mlb=False, mlb=mlb)
+    y_test = prepare_labels(test_df, fit_mlb=False, mlb=mlb)
 
     # TF-IDF vectorization
-    df["overview"] = df["overview"].apply(clean_text)
     x_train_tfidf, vectorizer = build_tfidf(train_df["overview"].fillna("").tolist())
     x_val_tfidf = vectorizer.transform(val_df["overview"].fillna("").tolist())
     x_test_tfidf = vectorizer.transform(test_df["overview"].fillna("").tolist())
@@ -39,19 +36,27 @@ def train_text_model(
     val_preds = model.predict(x_val_tfidf)
     test_preds = model.predict(x_test_tfidf)
 
-    print("Validation performance:")
-    print(classification_report(y_val, val_preds, zero_division=0))
-    print("\nTest performance:")
-    print(classification_report(y_test, test_preds, zero_division=0))
+    print("Validation metrics:")
+    print(f"F1-score (micro): {f1_score(y_val, val_preds, average='micro'):.4f}")
+    print(f"Hamming loss: {hamming_loss(y_val, val_preds):.4f}")
+    print(f"Accuracy per label: {accuracy_score(y_val, val_preds):.4f}\n")
+
+    print("Test metrics:")
+    print(f"F1-score (micro): {f1_score(y_test, test_preds, average='micro'):.4f}")
+    print(f"Hamming loss: {hamming_loss(y_test, test_preds):.4f}")
+    print(f"Accuracy per label: {accuracy_score(y_test, test_preds):.4f}\n")
 
     # Save outputs
     os.makedirs("data/processed", exist_ok=True)
     os.makedirs("models", exist_ok=True)
 
-    np.save("data/processed/text_train_features.npy", x_train_tfidf.toarray())
-    np.save("data/processed/text_val_features.npy", x_val_tfidf.toarray())
-    np.save("data/processed/text_test_features.npy", x_test_tfidf.toarray())
-    np.save("data/processed/labels.npy", y)
+    save_npz("data/processed/text_train_features.npz", x_train_tfidf)
+    save_npz("data/processed/text_val_features.npz", x_val_tfidf)
+    save_npz("data/processed/text_test_features.npz", x_test_tfidf)
+    np.save("data/processed/y_train.npy", y_train)
+    np.save("data/processed/y_val.npy", y_val)
+    np.save("data/processed/y_test.npy", y_test)
+
 
     with open("data/processed/tfidf_vectorizer.pkl", "wb") as f:
         pickle.dump(vectorizer, f)
