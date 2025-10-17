@@ -1,5 +1,6 @@
 import os
 import pickle
+import joblib
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -62,6 +63,7 @@ def train_text_model(csv_path = "data/processed/movies_subset.csv"):
         pickle.dump(vectorizer, f)
     with open("models/text_nb_model.pkl", "wb") as f:
         pickle.dump(model, f)
+    joblib.dump(mlb, "data/processed/mlb.pkl")
 
     print("Saved TF-IDF features, labels, and trained Naive Bayes model.")
 
