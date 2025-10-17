@@ -7,7 +7,7 @@ from src.data.dataset import PosterDataset, prepare_labels
 from src.models.image_models import save_image_model, train_image_knn
 from src.preprocessing.image_preproc import extract_features_from_dataset, get_transforms
 
-def train_image_model(csv_path: str = "data/processed/movies_subset.csv"):
+def train_image_model(csv_path: str = "data/processed/movies_valid.csv"):
     # Load data
     df = pd.read_csv(csv_path)
 
@@ -31,11 +31,14 @@ def train_image_model(csv_path: str = "data/processed/movies_subset.csv"):
     x_test, y_test = extract_features_from_dataset(test_dataset)
 
     # Train KNN
-    model = train_image_knn(x_train, y_train)
+    model, scaler = train_image_knn(x_train, y_train)
+
+    X_val_s = scaler.transform(x_val)
+    X_test_s = scaler.transform(x_test)
 
     # Evaluate
-    val_preds = model.predict(x_val)
-    test_preds = model.predict(x_test)
+    val_preds = model.predict(X_val_s)
+    test_preds = model.predict(X_test_s)
 
     print("\nValidation metrics:")
     print(f"F1-score (micro): {f1_score(y_val, val_preds, average='micro'):.4f}")

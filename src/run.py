@@ -11,13 +11,13 @@ if __name__ == "__main__":
 
     # # Step 1 — Train text model
     # print("\n--- Training Text Model ---")
-    train_text_model()
+    # train_text_model()
 
     # # Step 2 — Train image model
-    # print("\n--- Training Image Model ---")
-    # train_image_model()
+    print("\n--- Train)ing Image Model ---")
+    train_image_model()
 
-    # Step 3 — Combine (late fusion)
+    # # Step 3 — Combine (late fusion)
     print("\n--- Performing Late Fusion ---")
     # run_fusion(
     #     text_model_path="models/text_nb_model.pkl",

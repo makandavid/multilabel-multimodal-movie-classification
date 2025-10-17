@@ -6,7 +6,7 @@ import joblib
 import pickle
 import cv2
 from src.models.fusion import late_fusion, predict_multilabel, predictions_to_genres
-from src.preprocessing.image_preproc import extract_color_histogram
+from src.preprocessing.image_preproc import extract_color_histogram, get_transforms
 
 # --- Load models and vectorizer ---
 text_model = joblib.load("models/text_nb_model.pkl")
@@ -28,6 +28,7 @@ def predict_movie():
         text_probs = text_model.predict_proba(X_text)
 
         # Image features
+        image_transform = get_transforms()
         if poster_path.get():
             img = Image.open(poster_path.get()).resize((224, 224))
             img_feat = extract_color_histogram(img).reshape(1, -1)
@@ -35,10 +36,11 @@ def predict_movie():
         else:
             # If no image, only use text
             image_probs = np.zeros_like(text_probs)
+        print(image_probs)
 
         # Fusion
         fused_probs = late_fusion(text_probs, image_probs, alpha=0.6)
-        preds_binary = predict_multilabel(fused_probs, threshold=0.3)
+        preds_binary = predict_multilabel(fused_probs, threshold=0.5)
         preds_genres = predictions_to_genres(preds_binary, "data/processed/mlb.pkl")
 
 
@@ -60,20 +62,38 @@ def browse_image():
 # --- GUI Setup ---
 if __name__ == '__main__':
     root = tk.Tk()
-    root.title("Multimodal Movie Genre Prediction")
+    root.title("🎬 Multimodal Movie Genre Predictor")
+    root.geometry("650x500")
+    root.resizable(False, False)
 
     poster_path = tk.StringVar()
     result_text = tk.StringVar()
 
-    tk.Label(root, text="Movie Description:").pack(anchor="w")
-    text_entry = tk.Text(root, height=5, width=60)
-    text_entry.pack()
+    # Header
+    header = tk.Label(root, text="Multimodal Movie Genre Prediction", font=("Helvetica", 16, "bold"))
+    header.pack(pady=10)
 
-    tk.Button(root, text="Browse Poster Image", command=browse_image).pack(pady=5)
-    poster_label = tk.Label(root)
-    poster_label.pack()
+    # Text input frame
+    text_frame = tk.Frame(root, padx=10, pady=10)
+    text_frame.pack(fill="x")
+    tk.Label(text_frame, text="Movie Description:", font=("Helvetica", 12)).pack(anchor="w")
+    text_entry = tk.Text(text_frame, height=5, width=70, font=("Helvetica", 11))
+    text_entry.pack(pady=5)
 
-    tk.Button(root, text="Predict Genres", command=predict_movie).pack(pady=10)
-    tk.Label(root, textvariable=result_text, fg="blue").pack(pady=5)
+    # Poster input frame
+    poster_frame = tk.Frame(root, padx=10, pady=10)
+    poster_frame.pack(fill="x")
+    tk.Button(poster_frame, text="Browse Poster Image", command=browse_image, bg="#4CAF50", fg="white",
+              font=("Helvetica", 11)).pack(side="left")
+    poster_label = tk.Label(poster_frame, bd=2, relief="sunken")
+    poster_label.pack(side="left", padx=15)
+
+    # Predict button
+    tk.Button(root, text="Predict Genres", command=predict_movie, bg="#2196F3", fg="white",
+              font=("Helvetica", 12, "bold")).pack(pady=15)
+
+    # Result display
+    result_display = tk.Label(root, textvariable=result_text, fg="blue", font=("Helvetica", 12, "bold"))
+    result_display.pack(pady=10)
 
     root.mainloop()

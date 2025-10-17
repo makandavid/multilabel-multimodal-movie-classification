@@ -28,7 +28,14 @@ def clean_text(text: str):
     ]
     return " ".join(cleaned)
 
-def build_tfidf(corpus, max_features=40000):
-    vectorizer = TfidfVectorizer(max_features=max_features, ngram_range=(1, 3), min_df=3)
+def build_tfidf(corpus, max_features=20000):
+    vectorizer = TfidfVectorizer(
+        max_features=max_features,
+        ngram_range=(1, 2),
+        min_df=3,
+        max_df=0.8,
+        sublinear_tf=True,
+        stop_words="english"
+    )
     X = vectorizer.fit_transform(corpus)
     return X, vectorizer

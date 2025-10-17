@@ -66,11 +66,30 @@ def prepare_dataset(df: pd.DataFrame, num_samples=5000):
     df = df[df['poster_path'].notna()].sample(n=num_samples, random_state=42)
     download_posters(df)
     os.makedirs("data/processed", exist_ok=True)
-    df.to_csv("data/processed/movies_subset.csv", index=False)
+    df.to_csv("data/processed/movies_subset_40k.csv", index=False)
 
+
+def filter_valid_posters(input_csv="data/processed/movies_subset_40k.csv", posters_dir="data/posters", output_csv="data/processed/movies_valid.csv"):
+    df = pd.read_csv(input_csv, low_memory=False)
+    valid_ids = []
+
+    for _, row in df.iterrows():
+        movie_id = row.get("id")
+        if pd.isna(movie_id):
+            continue
+        poster_path = os.path.join(posters_dir, f"{movie_id}.jpg")
+        if os.path.exists(poster_path):
+            valid_ids.append(movie_id)
+
+    filtered_df = df[df["id"].isin(valid_ids)]
+    print(f"✅ Found {len(filtered_df)} movies with valid posters out of {len(df)} total.")
+    os.makedirs("data/processed", exist_ok=True)
+    filtered_df.to_csv(output_csv, index=False)
+    print(f"✅ Saved filtered dataset to {output_csv}")
 
 if __name__ == "__main__":
-    df = pd.read_csv("data/raw/movies_metadata.csv", low_memory=False)
-    prepare_dataset(df, num_samples=10000)
+    # df = pd.read_csv("data/raw/movies_metadata.csv", low_memory=False)
+    # prepare_dataset(df, num_samples=40000)
     # df_text = df[df['overview'].notna()]  # filter movies with overview
     # df_text.to_csv("data/processed/movies_text.csv", index=False)
+    filter_valid_posters()
