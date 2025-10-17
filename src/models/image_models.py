@@ -1,6 +1,5 @@
 import numpy as np
 from sklearn.discriminant_analysis import StandardScaler
-from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.multiclass import OneVsRestClassifier
 import joblib

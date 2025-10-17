@@ -4,17 +4,13 @@ from PIL import Image, ImageTk
 import numpy as np
 import joblib
 import pickle
-import cv2
 from src.models.fusion import late_fusion, predict_multilabel, predictions_to_genres
 from src.preprocessing.image_preproc import extract_color_histogram, get_transforms
 
-# --- Load models and vectorizer ---
 text_model = joblib.load("models/text_nb_model.pkl")
 image_model = joblib.load("models/image_knn_model.pkl")
 with open("data/processed/tfidf_vectorizer.pkl", "rb") as f:
     vectorizer = pickle.load(f)
-
-# --- Functions ---
 
 def predict_movie():
     try:
@@ -38,13 +34,10 @@ def predict_movie():
             image_probs = np.zeros_like(text_probs)
         print(image_probs)
 
-        # Fusion
         fused_probs = late_fusion(text_probs, image_probs, alpha=0.6)
         preds_binary = predict_multilabel(fused_probs, threshold=0.5)
         preds_genres = predictions_to_genres(preds_binary, "data/processed/mlb.pkl")
 
-
-        # Display result
         result_text.set(f"Predicted genres: {preds_genres}")
 
     except Exception as e:

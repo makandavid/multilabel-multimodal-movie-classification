@@ -29,10 +29,6 @@ def run_fusion(
     X_text_val = load_npz(text_val_features)
     X_text_test = load_npz(text_test_features)
 
-    # --- Transform text using the same vectorizer ---
-    # X_text_val = vectorizer.transform(X_text_val_raw)
-    # X_text_test = vectorizer.transform(X_text_test_raw)
-
     # --- Load image features from npz ---
     img_data = np.load(image_features_path)
     X_image_val = img_data["X_val"]
@@ -41,13 +37,6 @@ def run_fusion(
     # --- Load labels ---
     y_val = np.load(labels_val)
     y_test = np.load(labels_test)
-
-    print("Image train:", img_data["X_train"].shape)
-    print("Image val:", img_data["X_val"].shape)
-    print("Image test:", img_data["X_test"].shape)
-
-    print("Text val:", X_text_val.shape)
-    print("Text test:", X_text_test.shape)
 
     # --- Predict probabilities ---
     text_val_probs = text_model.predict_proba(X_text_val)

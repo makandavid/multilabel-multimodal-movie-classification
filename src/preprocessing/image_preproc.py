@@ -1,10 +1,7 @@
-from PIL import Image
-import torch
-from torchvision import transforms, models
+from torchvision import transforms
 import numpy as np
 import cv2
 from tqdm import tqdm
-from skimage.feature import hog
 from src.data.dataset import PosterDataset
 
 def get_transforms(train=True):

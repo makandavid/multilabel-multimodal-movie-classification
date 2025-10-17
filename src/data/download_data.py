@@ -32,7 +32,6 @@ def get_poster(
     movie_id: int,
     poster_path: str,
     posters_dir: str = "data/posters",
-    base_url: str = "https://image.tmdb.org/t/p/w500"
 ) -> Image.Image:
     
     os.makedirs(posters_dir, exist_ok=True)
@@ -40,20 +39,6 @@ def get_poster(
 
     if not poster_path or not isinstance(poster_path, str) or poster_path == "nan":
         return Image.new("RGB", (500, 750), color=(0, 0, 0))  # black placeholder
-    # if not os.path.exists(out_path):
-    #     url = f"{base_url}{poster_path}"
-    #     try:
-    #         r = requests.get(url, timeout=10)
-    #         if r.status_code == 200:
-    #             print(f"Poster found for movie {movie_id}")
-    #             with open(out_path, "wb") as f:
-    #                 f.write(r.content)
-    #         else:
-    #             print(f"Poster not found (HTTP {r.status_code}) for movie {movie_id}")
-    #             return Image.new("RGB", (500, 750), color=(0, 0, 0))
-    #     except Exception as e:
-    #         print(f"Failed to download poster for movie {movie_id}: {e}")
-    #         return Image.new("RGB", (500, 750), color=(0, 0, 0))
 
     try:
         print("Found")
@@ -90,6 +75,4 @@ def filter_valid_posters(input_csv="data/processed/movies_subset_40k.csv", poste
 if __name__ == "__main__":
     # df = pd.read_csv("data/raw/movies_metadata.csv", low_memory=False)
     # prepare_dataset(df, num_samples=40000)
-    # df_text = df[df['overview'].notna()]  # filter movies with overview
-    # df_text.to_csv("data/processed/movies_text.csv", index=False)
     filter_valid_posters()

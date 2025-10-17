@@ -1,10 +1,8 @@
-import os
 import nltk
 import re
 import string
-from nltk.corpus import stopwords, wordnet
+from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 nltk.download('stopwords', quiet=True)
