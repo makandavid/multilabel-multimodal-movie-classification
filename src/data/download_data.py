@@ -41,7 +41,6 @@ def get_poster(
         return Image.new("RGB", (500, 750), color=(0, 0, 0))  # black placeholder
 
     try:
-        print("Found")
         return Image.open(out_path).convert("RGB")
     except Exception as e:
         print(f"Corrupt or missing poster for movie {movie_id}: {e}")
@@ -67,10 +66,10 @@ def filter_valid_posters(input_csv="data/processed/movies_subset_40k.csv", poste
             valid_ids.append(movie_id)
 
     filtered_df = df[df["id"].isin(valid_ids)]
-    print(f"✅ Found {len(filtered_df)} movies with valid posters out of {len(df)} total.")
+    print(f"Found {len(filtered_df)} movies with valid posters out of {len(df)} total.")
     os.makedirs("data/processed", exist_ok=True)
     filtered_df.to_csv(output_csv, index=False)
-    print(f"✅ Saved filtered dataset to {output_csv}")
+    print(f"Saved filtered dataset to {output_csv}")
 
 if __name__ == "__main__":
     # df = pd.read_csv("data/raw/movies_metadata.csv", low_memory=False)
